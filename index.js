@@ -10,7 +10,7 @@ function run(cmd, cwd = root) {
   execSync(cmd, { stdio: "inherit", cwd });
 }
 
-async function main() {
+function main() {
   console.log("=== Artemisc Boot ===");
 
   if (!existsSync(join(root, "node_modules"))) {
@@ -19,20 +19,12 @@ async function main() {
 
   run("npx prisma generate", serverDir);
 
-  if (!existsSync(join(serverDir, "dist", "index.js"))) {
-    run("npx tsc", serverDir);
-  }
-
   if (!existsSync(join(root, "client", "dist", "index.html"))) {
     try { run("npx vite build", join(root, "client")); } catch (e) { console.log("Client build skipped:", e.message); }
   }
 
   console.log("=== Starting server ===");
-  const { buildApp } = await import("./server/dist/app.js");
-  const app = await buildApp();
-  const PORT = parseInt(process.env.PORT || "3001", 10);
-  await app.listen({ port: PORT, host: "0.0.0.0" });
-  console.log(`Artemisc running on port ${PORT}`);
+  execSync("npx tsx server/src/index.ts", { stdio: "inherit", cwd: root });
 }
 
-main().catch(e => { console.error("FATAL:", e); process.exit(1); });
+try { main(); } catch (e) { console.error("FATAL:", e); process.exit(1); }
