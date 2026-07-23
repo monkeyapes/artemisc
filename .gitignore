@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+.vscode/
+android/
+ios/
+src-tauri/target/
+*.exe
+*.apk
+*.db
+*.db-journal

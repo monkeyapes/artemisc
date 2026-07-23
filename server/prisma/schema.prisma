@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  username  String   @unique
+  displayName String @default("")
+  avatarUrl String?
+  online    Boolean  @default(false)
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  fcmToken  String?
+
+  messages   Message[]
+  contacts   Contact[]   @relation("UserContacts")
+  contactOf  Contact[]   @relation("ContactOf")
+  groupMembers GroupMember[]
+  readReceipts ReadReceipt[]
+  callLogsAsCaller  CallLog[] @relation("CallerLogs")
+  callLogsAsCallee CallLog[] @relation("CalleeLogs")
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  userId    String
+  contactId String
+  addedAt   DateTime @default(now())
+
+  user    User @relation("UserContacts", fields: [userId], references: [id])
+  contact User @relation("ContactOf", fields: [contactId], references: [id])
+
+  @@unique([userId, contactId])
+}
+
+model Chat {
+  id        String   @id @default(uuid())
+  isGroup   Boolean  @default(false)
+  name      String?
+  avatarUrl String?
+  lastMessageId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+  members  GroupMember[]
+}
+
+model GroupMember {
+  id     String @id @default(uuid())
+  chatId String
+  userId String
+  role   String @default("member")
+
+  chat Chat @relation(fields: [chatId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([chatId, userId])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String
+  senderId  String
+  content   String?
+  type      String   @default("text")
+  mediaUrl  String?
+  mediaType String?
+  replyToId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chat   Chat    @relation(fields: [chatId], references: [id])
+  sender User    @relation(fields: [senderId], references: [id])
+  readBy ReadReceipt[]
+
+  @@index([chatId, createdAt])
+}
+
+model ReadReceipt {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  status    String   @default("delivered")
+  readAt    DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId])
+}
+
+model CallLog {
+  id        String   @id @default(uuid())
+  callerId  String
+  calleeId  String
+  chatId    String?
+  type      String
+  status    String
+  duration  Int?
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+
+  caller User @relation("CallerLogs", fields: [callerId], references: [id])
+  callee User @relation("CalleeLogs", fields: [calleeId], references: [id])
+}
