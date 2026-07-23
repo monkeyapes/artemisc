@@ -1,13 +1,5 @@
-#!/bin/bash
 set -e
-echo "=== Installing client dependencies ==="
-cd client && npm install
-echo "=== Building client ==="
-npm run build
-echo "=== Installing server dependencies ==="
-cd ../server && npm install
-echo "=== Generating Prisma client ==="
-npx prisma generate
-echo "=== Building server ==="
-npm run build
-echo "=== Build complete ==="
+npm install
+cd client && npm run build && cd ..
+cd server && mkdir -p uploads && npx prisma generate && npm run build
+echo "BUILD COMPLETE"
