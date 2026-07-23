@@ -49,10 +49,15 @@ export async function buildApp() {
     secret: process.env.JWT_SECRET || "dev-secret-change-in-production",
   });
 
-  await app.register(fastifyStatic, {
-    root: join(__dirname, "..", "uploads"),
-    prefix: "/uploads/",
-  });
+  const uploadsDir = join(__dirname, "..", "uploads");
+  if (existsSync(uploadsDir)) {
+    await app.register(fastifyStatic, {
+      root: uploadsDir,
+      prefix: "/uploads/",
+    });
+  } else {
+    console.log("Uploads directory not found, skipping /uploads/ static route");
+  }
 
   app.decorateRequest("userId", "");
 
