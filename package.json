@@ -1,13 +1,14 @@
 {
   "name": "artemisc",
   "private": true,
+  "main": "index.js",
   "workspaces": ["client", "server"],
   "scripts": {
     "dev": "npx concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w client && npm run build -w server",
     "build:client": "npm run build -w client",
     "build:server": "npm run build -w server",
-    "start": "node start.js"
+    "start": "node index.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
